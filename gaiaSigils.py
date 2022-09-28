@@ -1,0 +1,153 @@
+## gaiaSigils.py bea shakow 2022
+import os
+import sys
+import random
+import asyncio
+import shelve
+import os
+from PIL import Image, ImageDraw, ImageFont
+import shelve
+import aggdraw
+import numpy as np
+from connection import *
+from funcs_sigil import *
+
+#### variables
+key = "abcdefghijklmnopqrstuvwxyz1234567890".upper()
+filePath="layouts.txt"
+path = os.path.dirname(__file__)+"\\images\\"
+vaultPath = os.path.dirname(__file__)+"\\Sigils\\"
+
+fontSize = 100
+canX = 600
+canY = 600
+leng = fontSize
+layout = {}
+
+##editable
+stroke = 10
+outlinePX = 15
+outlineColor = "#000000"#"#963C2C"
+globalOffsetStart = 100
+startAlt = -1
+alt = -1
+alternating = True
+colors = ["#4324AD", "#4D83FA", "#8734FA"]
+background = path+"blank.png"
+layoutPath = "spiral"
+
+####
+
+
+async def sigils(ctx, phrase, color, altFlip, layout, randcolor, lines):
+
+    #### Deal with arguments
+    ##                                     altFlip stuff
+    if (altFlip):
+        startAlt = 1
+    else:
+        startAlt = -1
+    alt = startAlt
+    ##                                     color stuff
+    colors = [color]
+    ##                                     layout
+    layoutPath=layout
+    ##                                     randcolor
+    if (randcolor):
+        random_number = random.randint(0,16777215)
+        hex_number = str(hex(random_number))
+        hex_number ='#'+ hex_number[2:]
+        colors=[hex_number]
+    ##                                     straight lines or not?
+    if (lines):
+        globalOffset = 1
+    else:
+        globalOffset = globalOffsetStart
+    ####
+
+    ####
+
+    #### args print test
+    print(f'with startAlt:{startAlt}, colors:{colors}, layout:{layoutPath}')
+
+    ## open the image
+    back = Image.open(background)
+    draw = aggdraw.Draw(back)
+
+    ## set up the pen
+    outline = aggdraw.Pen(colors[0], stroke)
+
+
+    ##load the layout
+    with shelve.open(filePath, writeback=False) as f:
+        layout = f[layoutPath]
+    ##sanitize prompt
+    prompt=phrase.upper()
+    words = prompt.split(" ")
+
+    safeWords = [] ## holds the sanitized words
+    for m in range(len(words)): ##go through each word
+        safePrompt = ""
+        for k in range(len(words[m])):##go through each letter of the word
+            if (str(words[m][k]) in key):## make sure it's in the key
+                safePrompt = safePrompt + words[m][k]##add it to the safePrompt
+        safeWords.append(safePrompt)##add that phrase into safeWords
+
+    conList = [] ## list of lists of connections, list for each word's connections in a list
+    circleList = [] ## list of circles to do
+
+    for u in range(len(safeWords)):##go through all the words
+        if(len(safeWords[u])==1):## if it's a one letter word, put it on the circle list
+            letter = safeWords[u][0] ##get the letter
+            topLeftX = layout[letter][0]-leng/4 ## and then the coords for the circle
+            topLeftY = layout[letter][1]-leng/3
+            botRightX = topLeftX + leng/2
+            botRightY = topLeftY + leng/2
+            circleList.append([topLeftX, topLeftY, botRightX, botRightY]) ## put them on the circleList
+        else:
+            conList.append([]) ##make a new list in conlist for a new word
+            for x in range(len(safeWords[u])-1): ##loop through that word and add the letter connections to the array
+                conList[u].append(connection(layout, safeWords[u][x], safeWords[u][x+1]))
+
+    ## set up each path string
+    strings = [] ##holds all the path strings
+    for e in range(len(conList)): ## loop through the word connection lists conList[e] is word #e's list of connections
+        newString = "" ## new pathstring for each word
+        alt = startAlt
+        for i in range(len(conList[e])): ##loop through each connection in this word's connection list
+            current = conList[e][i] #set current connection
+            if(i==0): ## if it's the beginning
+                newString = f'M{current.aPT()} Q{current.controlPoint(globalOffset, alt)}, {current.bPT()} '
+                if(alternating):
+                    alt = alt * -1
+            else: ##otherwise just add
+                newString = newString + f'{current.controlPoint(globalOffset, alt)}, {current.bPT()} '
+                if(alternating):
+                    alt = alt * -1
+        strings.append(newString) ##add our new string to strings
+
+    symbols = [] ## list for all the bezier curve symbols
+    for j in range(len(strings)):##go through strings
+        symbols.append(aggdraw.Symbol(strings[j]))##add a symbol for each word
+
+    for y in range(len(symbols)):##draw outline before
+        outline2 = aggdraw.Pen(outlineColor, stroke+outlinePX)##draw outline
+        draw.symbol((0,0),symbols[y], outline2)##draw it
+        draw.flush()
+
+    for y in range(len(symbols)):##draw all symbols
+        outline = aggdraw.Pen(colors[0], stroke)##change pen color if needd
+        draw.symbol((0,0),symbols[y], outline)##draw it
+        draw.flush()
+
+    for h in range(len(circleList)):## go through all the circles we need
+        draw.ellipse(circleList[h], outline)##draw them
+        draw.flush()
+
+
+    finPrompt = " ".join(safeWords)
+    saveFile=vaultPath + f"{finPrompt}-sigil.png"
+    print (f"Saving {saveFile}")
+    print ("##################")
+    back.save(saveFile)
+    return saveFile
