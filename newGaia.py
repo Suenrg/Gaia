@@ -49,7 +49,7 @@ async def sigil(
     randcolor: bool = SlashOption(name="random_color", required=False, default=False),
     lines: bool = SlashOption(name="lines", required=False, default=False)
     ):
-    print(f"################## \nRunning sigil with phrase {phrase}")
+    print(f"##################\nRunning sigil with phrase {phrase}")
     sigilFile = await sigils(ctx, phrase, colors, flip, layout, randcolor, lines)
     file = nextcord.File(sigilFile, filename="image.png")
     sigilEmbed = nextcord.Embed()
