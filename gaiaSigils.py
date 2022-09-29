@@ -59,7 +59,7 @@ async def sigils(ctx, phrase, colorsIn, altFlip, layout, randcolor, lines):
     ##                                     layout
     layoutPath=layout
     ##                                     randcolor
-    if (randcolor):
+    if (randcolor and colors[0]=="#4324AD"):
         colors=[]
         for i in range(numColors):
             colors.append(randomColor())
