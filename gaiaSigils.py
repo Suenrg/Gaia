@@ -28,7 +28,7 @@ layout = {}
 stroke = 10
 outlinePX = 10
 outlineColor = "#000000"#"#963C2C"
-circleRadius = 30
+circleRadius = 15
 globalOffsetStart = 100
 startAlt = -1
 alt = -1
@@ -104,20 +104,15 @@ async def sigils(ctx, phrase, color, altFlip, layout, randcolor, lines):
         if(len(safeWords[u])<=1):## if it's a one letter word, put it on the circle list
             conList.append([]) ## fill the space in conList so U  keeps track
             letter = safeWords[u][0] ##get the letter
-            # topLeftX = layout[letter][0]-leng/4 ## and then the coords for the circle
-            # topLeftY = layout[letter][1]-leng/3
-            # botRightX = topLeftX + leng/2
-            # botRightY = topLeftY + leng/2
             points = circlePoints(layout[letter], circleRadius)
             circleList.append(points) ## put them on the circleList
-            pointsOut = circlePoints(layout[letter], circleRadius + outlinePX)
-            circleOutlineList.append(pointsOut)
+            circleOutlineList.append(points)
         else:
             conList.append([]) ##make a new list in conlist for a new word
             for x in range(len(safeWords[u])-1): ##loop through that word and add the letter connections to the array
                 conList[u].append(connection(layout, safeWords[u][x], safeWords[u][x+1]))
 
-    ## set up each path string
+    ## set up each path string asd asd
     strings = [] ##holds all the path strings
     for e in range(len(conList)): ## loop through the word connection lists conList[e] is word #e's list of connections
         newString = "" ## new pathstring for each word
@@ -126,6 +121,8 @@ async def sigils(ctx, phrase, color, altFlip, layout, randcolor, lines):
             current = conList[e][i] #set current connection
             if(i==0): ## if it's the beginning
                 newString = f'M{current.aPT()} Q{current.controlPoint(globalOffset, alt)}, {current.bPT()} '
+                points = circlePoints(layout[current.a], circleRadius)
+                circleList.append(points) ## put them on the circleList
                 if(alternating):
                     alt = alt * -1
             else: ##otherwise just add
