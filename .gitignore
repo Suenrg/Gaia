@@ -127,7 +127,4 @@ dmypy.json
 ## bea stuff
 vault/
 *.pyc
-*.pyc
-*.pyc
-__pycache__/gaiaSigils.cpython-38.pyc
-__pycache__/connection.cpython-38.pyc
+__pycache__/
