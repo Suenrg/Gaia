@@ -19,10 +19,12 @@ path = os.path.dirname(__file__)+"\\images\\"
 vaultPath = os.path.dirname(__file__)+"\\vault\\"
 
 fontSize = 100
+numColors = 10
 canX = 600
 canY = 600
 leng = fontSize
 layout = {}
+
 
 ##editable
 stroke = 10
@@ -33,14 +35,13 @@ globalOffsetStart = 100
 startAlt = -1
 alt = -1
 alternating = True
-colors = ["#4324AD", "#4D83FA", "#8734FA"]
 background = path+"blank.png"
 layoutPath = "spiral"
 
 ####
 
 
-async def sigils(ctx, phrase, color, altFlip, layout, randcolor, lines):
+async def sigils(ctx, phrase, colorsIn, altFlip, layout, randcolor, lines):
 
     #### Deal with arguments
     ##                                     altFlip stuff
@@ -50,15 +51,18 @@ async def sigils(ctx, phrase, color, altFlip, layout, randcolor, lines):
         startAlt = -1
     alt = startAlt
     ##                                     color stuff
-    colors = [color]
+    colors = []
+    colorsIn = colorsIn.split(",")
+    print(colorsIn)
+    for x in range(len(colorsIn)):
+        colors.append(colorsIn[x].strip())
     ##                                     layout
     layoutPath=layout
     ##                                     randcolor
     if (randcolor):
-        random_number = random.randint(0,16777215)
-        hex_number = str(hex(random_number))
-        hex_number ='#'+ hex_number[2:]
-        colors=[hex_number]
+        colors=[]
+        for i in range(numColors):
+            colors.append(randomColor())
     ##                                     straight lines or not?
     if (lines):
         globalOffset = 1
@@ -76,9 +80,10 @@ async def sigils(ctx, phrase, color, altFlip, layout, randcolor, lines):
     draw = aggdraw.Draw(back)
 
     ## set up the pen and brush
-    outline = aggdraw.Pen(colors[0], stroke)
+    pen = aggdraw.Pen(colors[0], stroke)
     circleFill = aggdraw.Brush(colors[0])
     circleOutline = aggdraw.Brush(outlineColor)
+    colorCount = 0
 
 
 
@@ -95,19 +100,22 @@ async def sigils(ctx, phrase, color, altFlip, layout, randcolor, lines):
         for k in range(len(words[m])):##go through each letter of the word
             if (str(words[m][k]) in key):## make sure it's in the key
                 safePrompt = safePrompt + words[m][k]##add it to the safePrompt
-        safeWords.append(safePrompt)##add that phrase into safeWords
+        if(safePrompt!=''):
+            safeWords.append(safePrompt)##add that phrase into safeWords
+    print(safeWords)
+
     conList = [] ## list of lists of connections, list for each word's connections in a list
     circleList = [] ## list of circles to do
     circleOutlineList = [] # list of circle outlines to do
 
     for u in range(len(safeWords)):##go through all the words
-        if(len(safeWords[u])<=1):## if it's a one letter word, put it on the circle list
+        if(len(safeWords[u])==1):## if it's a one letter word, put it on the circle list (check not empty)
             conList.append([]) ## fill the space in conList so U  keeps track
             letter = safeWords[u][0] ##get the letter
             points = circlePoints(layout[letter], circleRadius)
             circleList.append(points) ## put them on the circleList
             circleOutlineList.append(points)
-        else:
+        elif(safeWords[u]):
             conList.append([]) ##make a new list in conlist for a new word
             for x in range(len(safeWords[u])-1): ##loop through that word and add the letter connections to the array
                 conList[u].append(connection(layout, safeWords[u][x], safeWords[u][x+1]))
@@ -147,12 +155,19 @@ async def sigils(ctx, phrase, color, altFlip, layout, randcolor, lines):
         draw.flush()
 
     for y in range(len(symbols)):##draw all symbols
-        outline = aggdraw.Pen(colors[0], stroke)##change pen color if needd
-        draw.symbol((0,0),symbols[y], outline)##draw it
+        pen = aggdraw.Pen(colors[colorCount], stroke)##change pen color
+        if (colorCount<numColors):
+            colorCount +=1
+        draw.symbol((0,0),symbols[y], pen)##draw it
         draw.flush()
 
+    colorCount = 0
     for h in range(len(circleList)):## go through all the circles we need
-        draw.ellipse(circleList[h], outline, circleFill)##draw them
+        pen = aggdraw.Pen(colors[colorCount], stroke)##change pen color
+        circleFill = aggdraw.Brush(colors[colorCount])
+        if (colorCount<numColors):
+            colorCount +=1
+        draw.ellipse(circleList[h], pen, circleFill)##draw them
         draw.flush()
 
 
