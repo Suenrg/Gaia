@@ -31,7 +31,8 @@ stroke = 10
 outlinePX = 10
 outlineColor = "#000000"#"#963C2C"
 circleRadius = 15
-globalOffsetStart = 100
+globalOffsetStart = 50
+distDivideStart = 100
 startAlt = -1
 alt = -1
 alternating = True
@@ -68,6 +69,7 @@ async def sigils(ctx, phrase, colorsIn, altFlip, layout, randcolor, lines):
         globalOffset = 1
     else:
         globalOffset = globalOffsetStart
+        distDivide = distDivideStart
     ####
 
     ####
@@ -128,13 +130,13 @@ async def sigils(ctx, phrase, colorsIn, altFlip, layout, randcolor, lines):
         for i in range(len(conList[e])): ##loop through each connection in this word's connection list
             current = conList[e][i] #set current connection
             if(i==0): ## if it's the beginning
-                newString = f'M{current.aPT()} Q{current.controlPoint(globalOffset, alt)}, {current.bPT()} '
+                newString = f'M{current.aPT()} Q{current.controlPoint(globalOffset, distDivide, alt)}, {current.bPT()} '
                 points = circlePoints(layout[current.a], circleRadius)
                 circleList.append(points) ## put them on the circleList
                 if(alternating):
                     alt = alt * -1
             else: ##otherwise just add
-                newString = newString + f'{current.controlPoint(globalOffset, alt)}, {current.bPT()} '
+                newString = newString + f'{current.controlPoint(globalOffset, distDivide, alt)}, {current.bPT()} '
                 if(alternating):
                     alt = alt * -1
         strings.append(newString) ##add our new string to strings
