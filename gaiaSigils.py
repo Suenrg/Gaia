@@ -42,7 +42,7 @@ layoutPath = "spiral"
 ####
 
 
-async def sigils(ctx, phrase, colorsIn, altFlip, layout, randcolor, lines):
+async def sigils(ctx, phrase, colorsIn, altFlip, layout, randcolor, lines, nonalternating):
 
     #### Deal with arguments
     ##                                     altFlip stuff
@@ -51,6 +51,11 @@ async def sigils(ctx, phrase, colorsIn, altFlip, layout, randcolor, lines):
     else:
         startAlt = -1
     alt = startAlt
+
+    if(nonalternating):
+        alternating = False
+    else:
+        alternating = True
     ##                                     color stuff
     colors = []
     colorsIn = colorsIn.split(",")
@@ -67,6 +72,7 @@ async def sigils(ctx, phrase, colorsIn, altFlip, layout, randcolor, lines):
     ##                                     straight lines or not?
     if (lines):
         globalOffset = 1
+        distDivide = distDivideStart
     else:
         globalOffset = globalOffsetStart
         distDivide = distDivideStart

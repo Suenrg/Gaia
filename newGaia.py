@@ -47,10 +47,11 @@ async def sigil(
     flip: bool=False,
     layout: str = SlashOption(name="layout", choices=["spiral", "rect"], required=False, default="spiral"),
     randcolor: bool = SlashOption(name="random_color", required=False, default=True),
-    lines: bool = SlashOption(name="lines", required=False, default=False)
+    lines: bool = SlashOption(name="lines", required=False, default=False),
+    nonalternating: bool = SlashOption(name="nonalternating", required=False, default=False)
     ):
     print(f"##################\nRunning sigil with phrase {phrase}")
-    sigilFile = await sigils(ctx, phrase, colors, flip, layout, randcolor, lines)
+    sigilFile = await sigils(ctx, phrase, colors, flip, layout, randcolor, lines, nonalternating)
     file = nextcord.File(sigilFile, filename="image.png")
     sigilEmbed = nextcord.Embed()
     sigilEmbed.title = phrase.upper()
