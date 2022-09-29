@@ -127,3 +127,4 @@ dmypy.json
 ## bea stuff
 vault/
 __pycache__/
+.pyc
