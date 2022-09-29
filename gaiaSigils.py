@@ -16,7 +16,7 @@ from funcs_sigil import *
 key = "abcdefghijklmnopqrstuvwxyz1234567890".upper()
 filePath="layouts.txt"
 path = os.path.dirname(__file__)+"\\images\\"
-vaultPath = os.path.dirname(__file__)+"\\Sigils\\"
+vaultPath = os.path.dirname(__file__)+"\\vault\\"
 
 fontSize = 100
 canX = 600
