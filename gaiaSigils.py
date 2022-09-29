@@ -26,8 +26,9 @@ layout = {}
 
 ##editable
 stroke = 10
-outlinePX = 15
+outlinePX = 10
 outlineColor = "#000000"#"#963C2C"
+circleRadius = 30
 globalOffsetStart = 100
 startAlt = -1
 alt = -1
@@ -74,8 +75,11 @@ async def sigils(ctx, phrase, color, altFlip, layout, randcolor, lines):
     back = Image.open(background)
     draw = aggdraw.Draw(back)
 
-    ## set up the pen
+    ## set up the pen and brush
     outline = aggdraw.Pen(colors[0], stroke)
+    circleFill = aggdraw.Brush(colors[0])
+    circleOutline = aggdraw.Brush(outlineColor)
+
 
 
     ##load the layout
@@ -92,18 +96,22 @@ async def sigils(ctx, phrase, color, altFlip, layout, randcolor, lines):
             if (str(words[m][k]) in key):## make sure it's in the key
                 safePrompt = safePrompt + words[m][k]##add it to the safePrompt
         safeWords.append(safePrompt)##add that phrase into safeWords
-
     conList = [] ## list of lists of connections, list for each word's connections in a list
     circleList = [] ## list of circles to do
+    circleOutlineList = [] # list of circle outlines to do
 
     for u in range(len(safeWords)):##go through all the words
-        if(len(safeWords[u])==1):## if it's a one letter word, put it on the circle list
+        if(len(safeWords[u])<=1):## if it's a one letter word, put it on the circle list
+            conList.append([]) ## fill the space in conList so U  keeps track
             letter = safeWords[u][0] ##get the letter
-            topLeftX = layout[letter][0]-leng/4 ## and then the coords for the circle
-            topLeftY = layout[letter][1]-leng/3
-            botRightX = topLeftX + leng/2
-            botRightY = topLeftY + leng/2
-            circleList.append([topLeftX, topLeftY, botRightX, botRightY]) ## put them on the circleList
+            # topLeftX = layout[letter][0]-leng/4 ## and then the coords for the circle
+            # topLeftY = layout[letter][1]-leng/3
+            # botRightX = topLeftX + leng/2
+            # botRightY = topLeftY + leng/2
+            points = circlePoints(layout[letter], circleRadius)
+            circleList.append(points) ## put them on the circleList
+            pointsOut = circlePoints(layout[letter], circleRadius + outlinePX)
+            circleOutlineList.append(pointsOut)
         else:
             conList.append([]) ##make a new list in conlist for a new word
             for x in range(len(safeWords[u])-1): ##loop through that word and add the letter connections to the array
@@ -130,9 +138,15 @@ async def sigils(ctx, phrase, color, altFlip, layout, randcolor, lines):
     for j in range(len(strings)):##go through strings
         symbols.append(aggdraw.Symbol(strings[j]))##add a symbol for each word
 
+    ############## Draw everything
+
     for y in range(len(symbols)):##draw outline before
         outline2 = aggdraw.Pen(outlineColor, stroke+outlinePX)##draw outline
         draw.symbol((0,0),symbols[y], outline2)##draw it
+        draw.flush()
+
+    for h in range(len(circleList)):## draw circle outlines
+        draw.ellipse(circleList[h], outline2, circleOutline)##draw them
         draw.flush()
 
     for y in range(len(symbols)):##draw all symbols
@@ -141,7 +155,7 @@ async def sigils(ctx, phrase, color, altFlip, layout, randcolor, lines):
         draw.flush()
 
     for h in range(len(circleList)):## go through all the circles we need
-        draw.ellipse(circleList[h], outline)##draw them
+        draw.ellipse(circleList[h], outline, circleFill)##draw them
         draw.flush()
 
 
