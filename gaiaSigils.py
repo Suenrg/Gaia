@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw, ImageFont
 import shelve
 import aggdraw
 import numpy as np
-from connection import *
+from gaiaClasses import *
 from funcs_sigil import *
 
 #### variables
@@ -98,6 +98,7 @@ async def sigils(ctx, phrase, colorsIn, altFlip, layout, randcolor, lines, nonal
     ##load the layout
     with shelve.open(filePath, writeback=False) as f:
         layout = f[layoutPath]
+
     ##sanitize prompt
     prompt=phrase.upper()
     words = prompt.split(" ")
@@ -106,79 +107,55 @@ async def sigils(ctx, phrase, colorsIn, altFlip, layout, randcolor, lines, nonal
     for m in range(len(words)): ##go through each word
         safePrompt = ""
         for k in range(len(words[m])):##go through each letter of the word
-            if (str(words[m][k]) in key):## make sure it's in the key
+            if (str(words[m][k]) in key):## make sure it's in the key ##todo include key in layout
                 safePrompt = safePrompt + words[m][k]##add it to the safePrompt
         if(safePrompt!=''):
             safeWords.append(safePrompt)##add that phrase into safeWords
     print(safeWords)
 
-    conList = [] ## list of lists of connections, list for each word's connections in a list
-    circleList = [] ## list of circles to do
-    circleOutlineList = [] # list of circle outlines to do
+    wordSymbols = [] ## holds all the word symbols
 
     for u in range(len(safeWords)):##go through all the words
+        wordSymbols.append(wordSymbol(safeWords[u])) ## create a new wordSymbol with this word
         if(len(safeWords[u])==1):## if it's a one letter word, put it on the circle list (check not empty)
-            conList.append([]) ## fill the space in conList so U  keeps track
             letter = safeWords[u][0] ##get the letter
-            points = circlePoints(layout[letter], circleRadius)
-            circleList.append(points) ## put them on the circleList
-            circleOutlineList.append(points)
-        elif(safeWords[u]):
-            conList.append([]) ##make a new list in conlist for a new word
+            points = circlePoints(layout[letter], circleRadius) ## get the points for that letter
+            wordSymbols[u].setCircle(points)
+        elif(len(safeWords[u])>1):
+            connectionList = []
             for x in range(len(safeWords[u])-1): ##loop through that word and add the letter connections to the array
-                conList[u].append(connection(layout, safeWords[u][x], safeWords[u][x+1]))
+                connectionList.append(connection(layout, safeWords[u][x], safeWords[u][x+1]))
+            print(f'connectionList: {connectionList}')
+            wordSymbols[u].setConnections(connectionList) ## add connections to the wordSymbol
+            wordSymbols[u].setCircle(circlePoints(layout[safeWords[u][0]], circleRadius)) ## add first circle to wordSymbol
+            wordSymbols[u].conToPath(globalOffset, distDivide, startAlt, alternating) ## turn the connection list into a path
 
-    ## set up each path string asd asd
-    strings = [] ##holds all the path strings
-    for e in range(len(conList)): ## loop through the word connection lists conList[e] is word #e's list of connections
-        newString = "" ## new pathstring for each word
-        alt = startAlt
-        for i in range(len(conList[e])): ##loop through each connection in this word's connection list
-            current = conList[e][i] #set current connection
-            if(i==0): ## if it's the beginning
-                newString = f'M{current.aPT()} Q{current.controlPoint(globalOffset, distDivide, alt)}, {current.bPT()} '
-                points = circlePoints(layout[current.a], circleRadius)
-                circleList.append(points) ## put them on the circleList
-                if(alternating):
-                    alt = alt * -1
-            else: ##otherwise just add
-                newString = newString + f'{current.controlPoint(globalOffset, distDivide, alt)}, {current.bPT()} '
-                if(alternating):
-                    alt = alt * -1
-        strings.append(newString) ##add our new string to strings
-
-    symbols = [] ## list for all the bezier curve symbols
-    for j in range(len(strings)):##go through strings
-        symbols.append(aggdraw.Symbol(strings[j]))##add a symbol for each word
 
     ############## Draw everything
-
-    for y in range(len(symbols)):##draw outline before
-        outline2 = aggdraw.Pen(outlineColor, stroke+outlinePX)##draw outline
-        draw.symbol((0,0),symbols[y], outline2)##draw it
-        draw.flush()
-
-    for h in range(len(circleList)):## draw circle outlines
-        draw.ellipse(circleList[h], outline2, circleOutline)##draw them
-        draw.flush()
-
-    for y in range(len(symbols)):##draw all symbols
-        pen = aggdraw.Pen(colors[colorCount], stroke)##change pen color
-        if (colorCount<numColors):
-            colorCount +=1
-        draw.symbol((0,0),symbols[y], pen)##draw it
-        draw.flush()
-
-    colorCount = 0
-    for h in range(len(circleList)):## go through all the circles we need
-        pen = aggdraw.Pen(colors[colorCount], stroke)##change pen color
+    for s in range(len(wordSymbols)): ##loop through all wordSymbols
+        symbolCurrent = wordSymbols[s] # set current wordSymbol
+        ## set pens
+        outlinePen = aggdraw.Pen(outlineColor, stroke+outlinePX)##set outline pen
+        pen = aggdraw.Pen(colors[colorCount], stroke)##set pen color
         circleFill = aggdraw.Brush(colors[colorCount])
         if (colorCount<numColors):
             colorCount +=1
-        draw.ellipse(circleList[h], pen, circleFill)##draw them
+
+        ## draw outlines
+        if(symbolCurrent.pathed): # if there is a path to draw
+            draw.symbol((0,0), symbolCurrent.retSymbol(), outlinePen)##draw it
+        draw.ellipse(symbolCurrent.circle[0], outlinePen, circleOutline)##draw the circle outline
         draw.flush()
 
+        ## draw colored bits
+        if (symbolCurrent.pathed):
+            draw.symbol((0,0),symbolCurrent.retSymbol(), pen)##draw it
+        draw.ellipse(symbolCurrent.circle[0], pen, circleFill)##draw them
+        draw.flush()
 
+    ####
+
+    ## do the saving
     finPrompt = " ".join(safeWords)
     saveFile=vaultPath + f"{finPrompt}-sigil.png"
     print (f"Saving {saveFile}")

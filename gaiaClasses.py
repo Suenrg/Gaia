@@ -2,8 +2,9 @@
 
 import numpy as np
 import math
+import aggdraw
 
-class connection:
+class connection: ## Holds a connection between two words
     def __init__(self, layout, a, b):
         self.a = a
         self.b = b
@@ -60,7 +61,8 @@ class connection:
         #print(final_vec)
         nX = int(x3 + final_vec[0])
         nY = int(y3 + final_vec[1])
-        if (nX >= 600):
+
+        if (nX >= 600): #keep control points on screen
             nX = 600
         if (nY >= 600):
             nY = 600
@@ -73,3 +75,35 @@ class connection:
 
     def prints(self):
         print(f'a = {self.a}: {self.layout[self.a]} ; b = {self.b}: {self.layout[self.b]}')
+
+class wordSymbol(): ## holds the symbol and circles and lines for each word
+    def __init__(self, wordIN):
+        self.word = wordIN
+        self.pathString = ""
+        self.circle = []
+        self.connections = []
+        self.pathed = False
+
+    def setConnections(self, connectionsIN): ## sets connections
+        for c in connectionsIN:
+            self.connections.append(c)
+
+    def setCircle(self, circleIN): # sets the circle
+        self.circle.append(circleIN)
+
+    def conToPath(self, globalOffset, distDivide, alt, alternating):
+        newString = ""
+        for i in range(len(self.connections)): # loop through connections
+            current = self.connections[i] #set current connection
+            if(i==0): ## if it's the beginning
+                newString = f'M{current.aPT()} Q{current.controlPoint(globalOffset, distDivide, alt)}, {current.bPT()} '
+            else: ##otherwise just add
+                newString = newString + f'{current.controlPoint(globalOffset, distDivide, alt)}, {current.bPT()} '
+            if(alternating):
+                alt = alt * -1
+        self.pathString = newString
+        self.pathed = True
+
+
+    def retSymbol(self):
+        return aggdraw.Symbol(self.pathString)
