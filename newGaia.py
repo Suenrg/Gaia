@@ -17,7 +17,7 @@ GUILD = os.getenv('DISCORD_GUILD')
 
 #### variables
 test_guild_id = 775449492232208404
-guilds=[727652231419002880, 775449492232208404, 572854786513174529]
+guilds=[727652231419002880, 775449492232208404, 572854786513174529, 923448242107207720]
 prefix="!g"
 intents = nextcord.Intents.default()
 intents.messages = True
@@ -43,20 +43,47 @@ async def on_ready():
 async def sigil(
     ctx,
     phrase: str,
-    colors: str = SlashOption(name="colors", required=False, default="#4324AD"),
     flip: bool=False,
+    nonalternating: bool = SlashOption(name="nonalternating", required=False, default=False),
     layout: str = SlashOption(name="layout", choices=["spiral", "rect"], required=False, default="spiral"),
     randcolor: bool = SlashOption(name="random_color", required=False, default=True),
-    lines: bool = SlashOption(name="lines", required=False, default=False),
-    nonalternating: bool = SlashOption(name="nonalternating", required=False, default=False)
+    colors: str = SlashOption(name="colors", required=False, default="#4324AD"),
+    lines: bool = SlashOption(name="lines", required=False, default=False)
     ):
     print(f"##################\nRunning sigil with phrase {phrase}")
-    sigilFile = await sigils(ctx, phrase, colors, flip, layout, randcolor, lines, nonalternating)
+    sigilFile = await sigils(ctx, phrase, flip, nonalternating, layout, randcolor, colors, lines)
     file = nextcord.File(sigilFile, filename="image.png")
     sigilEmbed = nextcord.Embed()
     sigilEmbed.title = phrase.upper()
     sigilEmbed.set_image(url=f"attachment://image.png")
     await ctx.send(file=file, embed=sigilEmbed)
+
+@bot.slash_command(description="Creates all 4 permutations of a sigil phrase.", guild_ids=guilds)
+async def allsigils(
+    ctx,
+    phrase: str,
+    layout: str = SlashOption(name="layout", choices=["spiral", "rect"], required=False, default="spiral"),
+    lines: bool = SlashOption(name="lines", required=False, default=False)
+    ):
+    flip = False
+    nonAlt = False
+    params = [flip,nonAlt]
+    numparams = len(params)
+    count = 0
+    for p in range(numparams**2):
+        sigilFile = await sigils(ctx, phrase, params[0], params[1],layout,True,"#4324AD",lines)
+        file = nextcord.File(sigilFile, filename="image.png")
+        sigilEmbed = nextcord.Embed()
+        sigilEmbed.title = phrase.upper()
+        sigilEmbed.description = f"Flip = {params[0]}, nonalternating = {params[1]}"
+        sigilEmbed.set_image(url=f"attachment://image.png")
+        await ctx.send(file=file, embed=sigilEmbed)
+        params[0] = not params[0]
+        if (p%numparams == numparams - 1):
+            params[1] = not params[1]
+
+
+
 
 ### Runs the bot!!
 bot.run(TOKEN)

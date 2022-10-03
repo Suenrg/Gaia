@@ -42,7 +42,7 @@ layoutPath = "spiral"
 ####
 
 
-async def sigils(ctx, phrase, colorsIn, altFlip, layout, randcolor, lines, nonalternating):
+async def sigils(ctx, phrase, altFlip, nonalternating, layout, randcolor, colorsIn, lines):
 
     #### Deal with arguments
     ##                                     altFlip stuff
