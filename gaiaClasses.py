@@ -83,6 +83,8 @@ class wordSymbol(): ## holds the symbol and circles and lines for each word
         self.circle = []
         self.connections = []
         self.pathed = False
+        self.line = []
+        self.lastAlt = 1
 
     def setConnections(self, connectionsIN): ## sets connections
         for c in connectionsIN:
@@ -90,6 +92,41 @@ class wordSymbol(): ## holds the symbol and circles and lines for each word
 
     def setCircle(self, circleIN): # sets the circle
         self.circle.append(circleIN)
+
+    def  setLine(self, pos, cptIn, size, outlinePX): #sets the end line
+        #this gives us (x, y)
+        x = pos[0]
+        y = pos[1]
+
+        cpt = cptIn.split(", ")
+        cptX = float(cpt[0])
+        cptY = float(cpt[1])
+
+        slope = (cptY-y)/(cptX-x)
+
+        x6 = 300 ##arbitrary, as we normalize in a short bit
+        y6 = (slope)*(x6 - x) + y
+
+        dist = math.sqrt(((x6-x)**2)+((y6-y)**2))
+        if (dist==0):
+            dist=.001
+        normVec =[(x6-x)/dist, (y6-y)/dist]
+        newX1 = (normVec[0]*size)+x
+        newY1 = (normVec[1]*size)+y
+
+        newX2 = -(normVec[0]*size)+x
+        newY2 = -(normVec[1]*size)+y
+
+        newX3 = (normVec[0]*(size+outlinePX))+x
+        newY3 = (normVec[1]*(size+outlinePX))+y
+
+        newX4 = -(normVec[0]*(size+outlinePX))+x
+        newY4 = -(normVec[1]*(size+outlinePX))+y
+
+        endLine = (newX1, newY1, newX2, newY2)
+        endLineOutline = (newX3, newY3, newX4, newY4)
+        out = [endLine, endLineOutline]
+        self.line.append(out)
 
     def conToPath(self, globalOffset, distDivide, alt, alternating):
         newString = ""
@@ -103,6 +140,7 @@ class wordSymbol(): ## holds the symbol and circles and lines for each word
                 alt = alt * -1
         self.pathString = newString
         self.pathed = True
+        return alt
 
 
     def retSymbol(self):

@@ -31,6 +31,7 @@ stroke = 10
 outlinePX = 10
 outlineColor = "#000000"#"#963C2C"
 circleRadius = 15
+endLineSize = 25
 globalOffsetStart = 50
 distDivideStart = 100
 startAlt = -1
@@ -128,8 +129,8 @@ async def sigils(ctx, phrase, altFlip, nonalternating, layout, randcolor, colors
             print(f'connectionList: {connectionList}')
             wordSymbols[u].setConnections(connectionList) ## add connections to the wordSymbol
             wordSymbols[u].setCircle(circlePoints(layout[safeWords[u][0]], circleRadius)) ## add first circle to wordSymbol
-            wordSymbols[u].conToPath(globalOffset, distDivide, startAlt, alternating) ## turn the connection list into a path
-
+            lastAlt = wordSymbols[u].conToPath(globalOffset, distDivide, startAlt, alternating) ## turn the connection list into a path
+            wordSymbols[u].setLine(layout[wordSymbols[u].connections[-1].b], wordSymbols[u].connections[-1].controlPoint(globalOffset, distDivide, lastAlt),endLineSize,outlinePX/2)
 
     ############## Draw everything
     for s in range(len(wordSymbols)): ##loop through all wordSymbols
@@ -145,12 +146,14 @@ async def sigils(ctx, phrase, altFlip, nonalternating, layout, randcolor, colors
         if(symbolCurrent.pathed): # if there is a path to draw
             draw.symbol((0,0), symbolCurrent.retSymbol(), outlinePen)##draw it
         draw.ellipse(symbolCurrent.circle[0], outlinePen, circleOutline)##draw the circle outline
+        draw.line(symbolCurrent.line[0][1], outlinePen)
         draw.flush()
 
         ## draw colored bits
         if (symbolCurrent.pathed):
             draw.symbol((0,0),symbolCurrent.retSymbol(), pen)##draw it
         draw.ellipse(symbolCurrent.circle[0], pen, circleFill)##draw them
+        draw.line(symbolCurrent.line[0][0], pen)
         draw.flush()
 
     ####

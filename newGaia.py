@@ -38,7 +38,7 @@ async def on_ready():
         # await client.change_presence(status=discord.Status.online, activity=discord.Game("!t help"))
         print(f'{guild.name}(id: {guild.id})') #test guild ID: 775449492232208404
 
-
+## Sigil stuff
 @bot.slash_command(description="Creates a sigil from your phrase!", guild_ids=guilds)
 async def sigil(
     ctx,
@@ -81,6 +81,8 @@ async def allsigils(
         params[0] = not params[0]
         if (p%numparams == numparams - 1):
             params[1] = not params[1]
+
+### Tarot card stuff
 
 
 
