@@ -10,6 +10,9 @@ from nextcord import SlashOption
 from nextcord.ext import commands
 from datetime import datetime
 from gaiaSigils import *
+from cardDecks import *
+from gaiaTarot import *
+from conf import *
 
 load_dotenv() #token stuff
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -24,12 +27,16 @@ intents.messages = True
 intents.reactions = True
 intents.message_content = True
 ##### filepaths
-vaultPath = os.path.dirname(__file__)+"\\vault\\"
 
 
 ####
 
 bot = commands.Bot(command_prefix=prefix, intents=intents)
+
+#### Load decks and deckPrefs
+decks = loadDecks(meaningsPath)
+
+####
 
 @bot.event
 async def on_ready():
@@ -38,7 +45,45 @@ async def on_ready():
         # await client.change_presence(status=discord.Status.online, activity=discord.Game("!t help"))
         print(f'{guild.name}(id: {guild.id})') #test guild ID: 775449492232208404
 
+
+## Tarot stuff
+##|||||||||||
+##vvvvvvvvvvv
+
+
+@bot.slash_command(description="Draws a tarot card!", guild_ids=guilds)
+async def drawcard(
+    ctx,
+    prompt: str = SlashOption(name='prompt', required=False, default=""),
+    ):
+    ## load deckPrefs
+    mA = str(ctx.user)
+    prefs = await getPrefs(deckPrefsPath, mA)
+    print(f"##################\nRunning tarot with deck: {prefs[0]} and art {prefs[1]} prefs: {type(prefs)}")
+    sendDeck = decks[prefs[0]]
+    sendArt = prefs[1]
+
+
+    await drawCard(ctx, sendDeck, sendArt, prompt)
+
+## deck prefences
+@bot.slash_command(description="Sets which deck you want Gaia to use for you!", guild_ids=guilds)
+async def choosedeck(
+    ctx,
+    deck: str = SlashOption(name="deck", choices=deckChoices, required=True, default=defaultDeck),
+    art: str = SlashOption(name="deck", choices=artChoices, required=True, default=defaultDeck)
+    ):
+    mA = str(ctx.user)
+    print(f"##################\nSaving prefs for {mA} with deck {deck}")
+    await savePrefs(deckPrefsPath, mA, deck, art)
+    ctx.send(f'Saved your preferences with deck = {deck}')
+
+
 ## Sigil stuff
+## ||||||||||
+## vvvvvvvvv
+
+
 @bot.slash_command(description="Creates a sigil from your phrase!", guild_ids=guilds)
 async def sigil(
     ctx,
@@ -82,7 +127,7 @@ async def allsigils(
         if (p%numparams == numparams - 1):
             params[1] = not params[1]
 
-### Tarot card stuff
+###
 
 
 
