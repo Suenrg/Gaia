@@ -26,6 +26,7 @@ intents = nextcord.Intents.default()
 intents.messages = True
 intents.reactions = True
 intents.message_content = True
+callAt = "<@1024094680968855663>"
 ##### filepaths
 
 
@@ -50,21 +51,31 @@ async def on_ready():
 ##|||||||||||
 ##vvvvvvvvvvv
 
+## slash command card
+# @bot.slash_command(description="Draws a tarot card!", guild_ids=guilds)
+# async def drawcard(
+#     ctx,
+#     prompt: str = SlashOption(name='prompt', required=False, default=""),
+#     ):
+#     ## load deckPrefs
+#     mA = str(ctx.user)
+#     prefs = await getPrefs(deckPrefsPath, mA)
+#     print(f"##################\nRunning tarot with deck: {prefs[0]} and art {prefs[1]} prefs: {type(prefs)}")
+#     sendDeck = decks[prefs[0]]
+#     sendArt = prefs[1]
+#     print(ctx)
+#     await drawCard(ctx.message, sendDeck, sendArt, prompt)
 
-@bot.slash_command(description="Draws a tarot card!", guild_ids=guilds)
-async def drawcard(
-    ctx,
-    prompt: str = SlashOption(name='prompt', required=False, default=""),
-    ):
-    ## load deckPrefs
-    mA = str(ctx.user)
-    prefs = await getPrefs(deckPrefsPath, mA)
-    print(f"##################\nRunning tarot with deck: {prefs[0]} and art {prefs[1]} prefs: {type(prefs)}")
-    sendDeck = decks[prefs[0]]
-    sendArt = prefs[1]
-
-
-    await drawCard(ctx, sendDeck, sendArt, prompt)
+## on_message controls
+@bot.event
+async def on_message(message):
+    if(message.content.startswith(prefix) or callAt in message.content):
+        print(f"##################\nCommand Recieved:\n\"{message.content}\"\n{message} ")
+        mA = str(message.author)
+        prefs = await getPrefs(deckPrefsPath, mA)
+        sendDeck = decks[prefs[0]]
+        sendArt = prefs[1]
+        await drawCard(message, sendDeck, sendArt, message.content)
 
 ## deck prefences
 @bot.slash_command(description="Sets which deck you want Gaia to use for you!", guild_ids=guilds)
@@ -77,6 +88,7 @@ async def choosedeck(
     print(f"##################\nSaving prefs for {mA} with deck {deck}")
     await savePrefs(deckPrefsPath, mA, deck, art)
     ctx.send(f'Saved your preferences with deck = {deck}')
+
 
 
 ## Sigil stuff

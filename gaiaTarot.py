@@ -8,23 +8,23 @@ from datetime import datetime
 from conf import *
 import nextcord
 
-async def drawCard(ctx, deck, art, prompt):
+async def drawCard(mess, deck, art, prompt):
     seed = prompt + str(datetime.now())
     random.seed(seed)
     choice = random.choice(list(deck.items()))
     card = choice[1]
     print(f"Choice: {choice}")
-    await dispCard(ctx, card, art)
+    await dispCard(mess, card, art)
     # choice = random.choice(list(meanings.items()))
 
 
-async def dispCard(ctx, card, art):
+async def dispCard(mess, card, art):
     print(f'displaying card: {print(card.name)}')
     cardIcon = imgPath + art + "\\" + card.icon
-    msg = nextcord.Embed(title=card.name, description=(card.upright), color=ctx.user.color)
+    msg = nextcord.Embed(title=card.name, description=(card.upright), color=mess.author.color)
     file = nextcord.File(cardIcon, filename="image.png")
     msg.set_image(url=f"attachment://image.png")
-    await ctx.send(file=file, embed=msg)
+    await mess.channel.send(file=file, embed=msg)
 
 async def savePrefs(deckPrefsPath, name, deck, art):
     with shelve.open(deckPrefsPath) as s:
