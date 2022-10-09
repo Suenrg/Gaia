@@ -132,3 +132,5 @@ __pycache__/
 settings/deckPrefs.txt.dat
 settings/deckPrefs.txt.dir
 deckPrefs.txt
+settings/talkingChannels.txt.dat
+settings/talkingChannels.txt.dir

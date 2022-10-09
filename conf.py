@@ -1,10 +1,12 @@
 ##conf.py
 import os
+path = os.path.dirname(__file__)
+vaultPath = path + "\\vault\\"
+meaningsPath = [path + "\\meanings\\tarotMeanings.tsv"]
+imgPath = path + "\\images\\tarot\\"
+deckPrefsPath = path + "\\settings\\deckPrefs.txt"
+talkingChannelsPath = path + "\\settings\\talkingChannels.txt"
 
-vaultPath = os.path.dirname(__file__)+"\\vault\\"
-meaningsPath = [os.path.dirname(__file__)+"\\meanings\\tarotMeanings.tsv"]
-imgPath = os.path.dirname(__file__)+"\\images\\tarot\\"
-deckPrefsPath = os.path.dirname(__file__)+"\\settings\\deckPrefs.txt"
 
 defaultDeck = "Biddy"
 defaultArt = "Biddy"

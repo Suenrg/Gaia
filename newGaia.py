@@ -27,6 +27,7 @@ intents.messages = True
 intents.reactions = True
 intents.message_content = True
 callAt = "<@1024094680968855663>"
+talkChance = 100 ##higher is less probable
 ##### filepaths
 
 
@@ -69,13 +70,35 @@ async def on_ready():
 ## on_message controls
 @bot.event
 async def on_message(message):
-    if(message.content.startswith(prefix) or callAt in message.content):
+    if(message.content.startswith(prefix) or callAt in message.content): ##are we in a command?
         print(f"##################\nCommand Recieved:\n\"{message.content}\"\n{message} ")
         mA = str(message.author)
         prefs = await getPrefs(deckPrefsPath, mA)
         sendDeck = decks[prefs[0]]
         sendArt = prefs[1]
+
         await drawCard(message, sendDeck, sendArt, message.content)
+
+    #####
+    ##### handle  talking chances
+    cID = str(message.channel.id)
+    guildID = str(message.channel.guild.id)
+    with shelve.open(talkingChannelsPath, writeback=True) as s:
+        if (guildID in s):
+            if (cID in s[guildID]):
+                if(s[guildID][cID]['talks'] == True):
+                    current = s[guildID][cID]
+                    chance = random.randint(0,current['chance']) #random chance
+                    print(f"count: {str(current['count'])} Chance: {str(chance)}")
+                    if(chance <= current['count']):
+                        print("talking!")
+                        prefArt = random.choice(artChoices)
+                        prefDeck = "Biddy"
+                        current['count'] = 0
+                        await drawCard(message, decks[prefDeck], prefArt, message.content)
+                    else:
+                        current['count'] = current['count']+1
+
 
 ## deck prefences
 @bot.slash_command(description="Sets which deck you want Gaia to use for you!", guild_ids=guilds)
@@ -88,6 +111,25 @@ async def choosedeck(
     print(f"##################\nSaving prefs for {mA} with deck {deck}")
     await savePrefs(deckPrefsPath, mA, deck, art)
     ctx.send(f'Saved your preferences with deck = {deck}')
+
+@bot.slash_command(description="Lets Gaia talk in this channel freely (has a small chance to respond to a message with a card)", guild_ids=guilds)
+async def gaiatalking(
+    ctx,
+    talks: bool = SlashOption(name="talks", required=False, default=True)
+    ):
+    mA = str(ctx.user)
+    cID = str(ctx.channel.id)
+    guildID = str(ctx.channel.guild.id)
+    print(f"##################\nLetting Gaia talk in channel:{cID} in guild:{guildID} for {mA} ")
+    with shelve.open(talkingChannelsPath, writeback=True) as s:
+        if not(guildID in s):
+            s[guildID] = {}
+        s[guildID][cID] = {}
+        s[guildID][cID]['talks'] = talks
+        s[guildID][cID]['chance'] = talkChance
+        s[guildID][cID]['count'] = 0
+        print(f"s[guildID][cID] = {s[guildID][cID]}")
+    await ctx.send(f"Gaia can talk in this channel: {talks}")
 
 
 

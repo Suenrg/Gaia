@@ -15,11 +15,12 @@ async def drawCard(mess, deck, art, prompt):
     card = choice[1]
     print(f"Choice: {choice}")
     await dispCard(mess, card, art)
+    return [card, art]
     # choice = random.choice(list(meanings.items()))
 
 
 async def dispCard(mess, card, art):
-    print(f'displaying card: {print(card.name)}')
+    print(f'displaying card: {card.name}')
     cardIcon = imgPath + art + "\\" + card.icon
     msg = nextcord.Embed(title=card.name, description=(card.upright), color=mess.author.color)
     file = nextcord.File(cardIcon, filename="image.png")
