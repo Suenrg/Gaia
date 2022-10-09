@@ -128,3 +128,6 @@ dmypy.json
 vault/
 *.pyc
 __pycache__/
+*.bak
+settings/deckPrefs.txt.dat
+settings/deckPrefs.txt.dir
