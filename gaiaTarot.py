@@ -47,4 +47,7 @@ async def getPrefs(deckPrefsPath, name):
                 art = s[name]['art']
             else:
                 art = defaultArt
+        else:
+            deck = defaultDeck
+            art = defaultArt
     return [deck, art]

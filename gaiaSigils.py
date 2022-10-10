@@ -11,6 +11,7 @@ import aggdraw
 import numpy as np
 from gaiaClasses import *
 from funcs_sigil import *
+from conf import *
 
 #### variables
 key = "abcdefghijklmnopqrstuvwxyz1234567890".upper()
@@ -38,7 +39,6 @@ startAlt = -1
 alt = -1
 alternating = True
 background = path+"blank.png"
-layoutPath = "spiral"
 
 ####
 
@@ -64,7 +64,7 @@ async def sigils(ctx, phrase, altFlip, nonalternating, layout, randcolor, colors
     for x in range(len(colorsIn)):
         colors.append(colorsIn[x].strip())
     ##                                     layout
-    layoutPath=layout
+    layoutChoice=layout
     ##                                     randcolor
     if (randcolor and colors[0]=="#4324AD"):
         colors=[]
@@ -82,7 +82,7 @@ async def sigils(ctx, phrase, altFlip, nonalternating, layout, randcolor, colors
     ####
 
     #### args print test
-    print(f'with startAlt:{startAlt}, colors:{colors}, layout:{layoutPath}')
+    print(f'with startAlt:{startAlt}, colors:{colors}, layout:{layoutChoice}')
 
     ## open the image
     back = Image.open(background)
@@ -97,8 +97,9 @@ async def sigils(ctx, phrase, altFlip, nonalternating, layout, randcolor, colors
 
 
     ##load the layout
-    with shelve.open(filePath, writeback=False) as f:
-        layout = f[layoutPath]
+    with shelve.open(layoutsPath, writeback=False) as f:
+        layout = f[layoutChoice]
+        print(layout)
 
     ##sanitize prompt
     prompt=phrase.upper()

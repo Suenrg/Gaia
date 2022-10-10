@@ -144,7 +144,7 @@ async def sigil(
     phrase: str,
     flip: bool=False,
     nonalternating: bool = SlashOption(name="nonalternating", required=False, default=False),
-    layout: str = SlashOption(name="layout", choices=["spiral", "rect"], required=False, default="spiral"),
+    layout: str = SlashOption(name="layout", choices=layoutChoices, required=False, default="spiral"),
     randcolor: bool = SlashOption(name="random_color", required=False, default=True),
     colors: str = SlashOption(name="colors", required=False, default="#4324AD"),
     lines: bool = SlashOption(name="lines", required=False, default=False)
@@ -161,7 +161,7 @@ async def sigil(
 async def allsigils(
     ctx,
     phrase: str,
-    layout: str = SlashOption(name="layout", choices=["spiral", "rect"], required=False, default="spiral"),
+    layout: str = SlashOption(name="layout", choices=layoutChoices, required=False, default="spiral"),
     lines: bool = SlashOption(name="lines", required=False, default=False)
     ):
     flip = False
