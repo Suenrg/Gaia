@@ -19,7 +19,7 @@ startX = leng/2
 startY = leng/2+10
 lineWidth = 10
 layout={}
-sigilName = 'querty'
+sigilName = 'geomabet'
 radius = 15
 
 c = 0

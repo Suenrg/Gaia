@@ -6,7 +6,7 @@ import shelve
 from PIL import Image, ImageDraw, ImageFont
 from conf import *
 
-layoutName = "querty"
+layoutName = "geomabet"
 layout = {}
 fontSize = 50
 
