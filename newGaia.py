@@ -40,11 +40,11 @@ decks = loadDecks(meaningsPath)
 
 ####
 
-@bot.event
+@bot.event #start gaia up, show what guilds we're connected to 
 async def on_ready():
     print(f'{bot.user} is connected to the following guilds:\n')
     for guild in bot.guilds:
-        # await client.change_presence(status=discord.Status.online, activity=discord.Game("!t help"))
+        await client.change_presence(status=discord.Status.online, activity=discord.Game("!t help"))
         print(f'{guild.name}(id: {guild.id})') #test guild ID: 775449492232208404
 
 
@@ -59,8 +59,8 @@ async def on_ready():
 #     prompt: str = SlashOption(name='prompt', required=False, default=""),
 #     ):
 #     ## load deckPrefs
-#     mA = str(ctx.user)
-#     prefs = await getPrefs(deckPrefsPath, mA)
+#     messageAuthor = str(ctx.user)
+#     prefs = await getPrefs(deckPrefsPath, messageAuthor)
 #     print(f"##################\nRunning tarot with deck: {prefs[0]} and art {prefs[1]} prefs: {type(prefs)}")
 #     sendDeck = decks[prefs[0]]
 #     sendArt = prefs[1]
@@ -70,10 +70,10 @@ async def on_ready():
 ## on_message controls
 @bot.event
 async def on_message(message):
-    if(message.content.startswith(prefix) or callAt in message.content): ##are we in a command?
+    if(message.content.startswith(prefix) or callAt in message.content): ##are we in a command? checking for prefix or callAt
         print(f"##################\nCommand Recieved:\n\"{message.content}\"\n{message} ")
-        mA = str(message.author)
-        prefs = await getPrefs(deckPrefsPath, mA)
+        messageAuthor = str(message.author) #message author
+        prefs = await getPrefs(deckPrefsPath, messageAuthor)
         sendDeck = decks[prefs[0]]
         sendArt = prefs[1]
 
@@ -107,9 +107,9 @@ async def choosedeck(
     deck: str = SlashOption(name="deck", choices=deckChoices, required=True, default=defaultDeck),
     art: str = SlashOption(name="deck", choices=artChoices, required=True, default=defaultDeck)
     ):
-    mA = str(ctx.user)
-    print(f"##################\nSaving prefs for {mA} with deck {deck}")
-    await savePrefs(deckPrefsPath, mA, deck, art)
+    messageAuthor = str(ctx.user)
+    print(f"##################\nSaving prefs for {messageAuthor} with deck {deck}")
+    await savePrefs(deckPrefsPath, messageAuthor, deck, art)
     ctx.send(f'Saved your preferences with deck = {deck}')
 
 @bot.slash_command(description="Lets Gaia talk in this channel freely (has a small chance to respond to a message with a card)", guild_ids=guilds)
@@ -117,10 +117,10 @@ async def gaiatalking(
     ctx,
     talks: bool = SlashOption(name="talks", required=False, default=True)
     ):
-    mA = str(ctx.user)
+    messageAuthor = str(ctx.user)
     cID = str(ctx.channel.id)
     guildID = str(ctx.channel.guild.id)
-    print(f"##################\nLetting Gaia talk in channel:{cID} in guild:{guildID} for {mA} ")
+    print(f"##################\nLetting Gaia talk in channel:{cID} in guild:{guildID} for {messageAuthor} ")
     with shelve.open(talkingChannelsPath, writeback=True) as s:
         if not(guildID in s):
             s[guildID] = {}
@@ -133,55 +133,55 @@ async def gaiatalking(
 
 
 
-## Sigil stuff
-## ||||||||||
-## vvvvvvvvv
+# ## Sigil stuff
+# ## ||||||||||
+# ## vvvvvvvvv
 
 
-@bot.slash_command(description="Creates a sigil from your phrase!", guild_ids=guilds)
-async def sigil(
-    ctx,
-    phrase: str,
-    flip: bool=False,
-    nonalternating: bool = SlashOption(name="nonalternating", required=False, default=False),
-    layout: str = SlashOption(name="layout", choices=layoutChoices, required=False, default="spiral"),
-    randcolor: bool = SlashOption(name="random_color", required=False, default=True),
-    colors: str = SlashOption(name="colors", required=False, default="#4324AD"),
-    lines: bool = SlashOption(name="lines", required=False, default=False)
-    ):
-    print(f"##################\nRunning sigil with phrase {phrase}")
-    sigilFile = await sigils(ctx, phrase, flip, nonalternating, layout, randcolor, colors, lines)
-    file = nextcord.File(sigilFile, filename="image.png")
-    sigilEmbed = nextcord.Embed()
-    sigilEmbed.title = phrase.upper()
-    sigilEmbed.set_image(url=f"attachment://image.png")
-    await ctx.send(file=file, embed=sigilEmbed)
+# @bot.slash_command(description="Creates a sigil from your phrase!", guild_ids=guilds)
+# async def sigil(
+#     ctx,
+#     phrase: str,
+#     flip: bool=False,
+#     nonalternating: bool = SlashOption(name="nonalternating", required=False, default=False),
+#     layout: str = SlashOption(name="layout", choices=layoutChoices, required=False, default="spiral"),
+#     randcolor: bool = SlashOption(name="random_color", required=False, default=True),
+#     colors: str = SlashOption(name="colors", required=False, default="#4324AD"),
+#     lines: bool = SlashOption(name="lines", required=False, default=False)
+#     ):
+#     print(f"##################\nRunning sigil with phrase {phrase}")
+#     sigilFile = await sigils(ctx, phrase, flip, nonalternating, layout, randcolor, colors, lines)
+#     file = nextcord.File(sigilFile, filename="image.png")
+#     sigilEmbed = nextcord.Embed()
+#     sigilEmbed.title = phrase.upper()
+#     sigilEmbed.set_image(url=f"attachment://image.png")
+#     await ctx.send(file=file, embed=sigilEmbed)
 
-@bot.slash_command(description="Creates all 4 permutations of a sigil phrase.", guild_ids=guilds)
-async def allsigils(
-    ctx,
-    phrase: str,
-    layout: str = SlashOption(name="layout", choices=layoutChoices, required=False, default="spiral"),
-    lines: bool = SlashOption(name="lines", required=False, default=False)
-    ):
-    flip = False
-    nonAlt = False
-    params = [flip,nonAlt]
-    numparams = len(params)
-    count = 0
-    for p in range(numparams**2):
-        sigilFile = await sigils(ctx, phrase, params[0], params[1],layout,True,"#4324AD",lines)
-        file = nextcord.File(sigilFile, filename="image.png")
-        sigilEmbed = nextcord.Embed()
-        sigilEmbed.title = phrase.upper()
-        sigilEmbed.description = f"Flip = {params[0]}, nonalternating = {params[1]}"
-        sigilEmbed.set_image(url=f"attachment://image.png")
-        await ctx.send(file=file, embed=sigilEmbed)
-        params[0] = not params[0]
-        if (p%numparams == numparams - 1):
-            params[1] = not params[1]
+# @bot.slash_command(description="Creates all 4 permutations of a sigil phrase.", guild_ids=guilds)
+# async def allsigils(
+#     ctx,
+#     phrase: str,
+#     layout: str = SlashOption(name="layout", choices=layoutChoices, required=False, default="spiral"),
+#     lines: bool = SlashOption(name="lines", required=False, default=False)
+#     ):
+#     flip = False
+#     nonAlt = False
+#     params = [flip,nonAlt]
+#     numparams = len(params)
+#     count = 0
+#     for p in range(numparams**2):
+#         sigilFile = await sigils(ctx, phrase, params[0], params[1],layout,True,"#4324AD",lines)
+#         file = nextcord.File(sigilFile, filename="image.png")
+#         sigilEmbed = nextcord.Embed()
+#         sigilEmbed.title = phrase.upper()
+#         sigilEmbed.description = f"Flip = {params[0]}, nonalternating = {params[1]}"
+#         sigilEmbed.set_image(url=f"attachment://image.png")
+#         await ctx.send(file=file, embed=sigilEmbed)
+#         params[0] = not params[0]
+#         if (p%numparams == numparams - 1):
+#             params[1] = not params[1]
 
-###
+# ###
 
 
 

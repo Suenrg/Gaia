@@ -14,4 +14,4 @@ defaultDeck = "Biddy"
 defaultArt = "Biddy"
 deckChoices = ["Biddy"]
 artChoices = ["Biddy"]
-layoutChoices = ["spiral", "rect", "geomabet", "querty"]
+# layoutChoices = ["spiral", "rect", "geomabet", "querty"]
