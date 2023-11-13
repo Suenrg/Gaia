@@ -8,10 +8,11 @@ from dotenv import load_dotenv
 import nextcord
 from nextcord import SlashOption
 from nextcord.ext import commands
+from nextcord.ext import menus
 from datetime import datetime
-from gaiaSigils import *
+# from gaiaSigils import *
 from cardDecks import *
-from gaiaTarot import *
+from tarotFuncs import *
 from conf import *
 
 load_dotenv() #token stuff
@@ -44,9 +45,9 @@ decks = loadDecks(meaningsPath)
 async def on_ready():
     print(f'{bot.user} is connected to the following guilds:\n')
     for guild in bot.guilds:
-        await client.change_presence(status=discord.Status.online, activity=discord.Game("!t help"))
+        await bot.change_presence(status=nextcord.Status.online, activity=nextcord.Game("!t help"))
         print(f'{guild.name}(id: {guild.id})') #test guild ID: 775449492232208404
-
+       
 
 ## Tarot stuff
 ##|||||||||||
@@ -70,6 +71,7 @@ async def on_ready():
 ## on_message controls
 @bot.event
 async def on_message(message):
+    ctx = await bot.get_context(message)
     if(message.content.startswith(prefix) or callAt in message.content): ##are we in a command? checking for prefix or callAt
         print(f"##################\nCommand Recieved:\n\"{message.content}\"\n{message} ")
         messageAuthor = str(message.author) #message author
@@ -77,13 +79,13 @@ async def on_message(message):
         sendDeck = decks[prefs[0]]
         sendArt = prefs[1]
 
-        await drawCard(message, sendDeck, sendArt, message.content)
+        await drawCard(message, sendDeck, sendArt, message.content, ctx)
 
-    #####
+    
     ##### handle  talking chances
-    cID = str(message.channel.id)
-    guildID = str(message.channel.guild.id)
-    with shelve.open(talkingChannelsPath, writeback=True) as s:
+    cID = str(message.channel.id) ##message channel id
+    guildID = str(message.channel.guild.id) # what guild are we in?
+    with shelve.open(talkingChannelsPath, writeback=True) as s: #open talkingChannels shelf
         if (guildID in s):
             if (cID in s[guildID]):
                 if(s[guildID][cID]['talks'] == True):
@@ -95,10 +97,15 @@ async def on_message(message):
                         prefArt = random.choice(artChoices)
                         prefDeck = "Biddy"
                         current['count'] = 0
-                        await drawCard(message, decks[prefDeck], prefArt, message.content)
+                        # await drawCard(message, decks[prefDeck], prefArt, message.content)
                     else:
                         current['count'] = current['count']+1
 
+# # Drawing cards
+# @bot.command()
+# async def drawCommand(ctx, mess, deck, art, prompt):
+#     print(ctx)
+#     await drawCard(mess, deck, art, prompt, ctx)
 
 ## deck prefences
 @bot.slash_command(description="Sets which deck you want Gaia to use for you!", guild_ids=guilds)
@@ -110,7 +117,7 @@ async def choosedeck(
     messageAuthor = str(ctx.user)
     print(f"##################\nSaving prefs for {messageAuthor} with deck {deck}")
     await savePrefs(deckPrefsPath, messageAuthor, deck, art)
-    ctx.send(f'Saved your preferences with deck = {deck}')
+    await ctx.send(f'Saved your preferences with deck = {deck.name}')
 
 @bot.slash_command(description="Lets Gaia talk in this channel freely (has a small chance to respond to a message with a card)", guild_ids=guilds)
 async def gaiatalking(
