@@ -7,7 +7,7 @@ class Deck:
         self.name = name
         self.cards = {}
 
-    def addCard(card):
+    def addCard(self, card):
         self.cards.append(card)
 
 

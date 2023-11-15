@@ -22,13 +22,13 @@ GUILD = os.getenv('DISCORD_GUILD')
 #### variables
 test_guild_id = 775449492232208404
 guilds=[727652231419002880, 775449492232208404, 572854786513174529, 923448242107207720]
-prefix="!g"
+prefix="!t"
 intents = nextcord.Intents.default()
 intents.messages = True
 intents.reactions = True
 intents.message_content = True
 callAt = "<@1024094680968855663>"
-talkChance = 100 ##higher is less probable
+talkChance = 10 ##higher is less probable
 ##### filepaths
 
 
@@ -83,23 +83,25 @@ async def on_message(message):
 
     
     ##### handle  talking chances
-    cID = str(message.channel.id) ##message channel id
-    guildID = str(message.channel.guild.id) # what guild are we in?
-    with shelve.open(talkingChannelsPath, writeback=True) as s: #open talkingChannels shelf
-        if (guildID in s):
-            if (cID in s[guildID]):
-                if(s[guildID][cID]['talks'] == True):
-                    current = s[guildID][cID]
-                    chance = random.randint(0,current['chance']) #random chance
-                    print(f"count: {str(current['count'])} Chance: {str(chance)}")
-                    if(chance <= current['count']):
-                        print("talking!")
-                        prefArt = random.choice(artChoices)
-                        prefDeck = "Biddy"
-                        current['count'] = 0
-                        # await drawCard(message, decks[prefDeck], prefArt, message.content)
-                    else:
-                        current['count'] = current['count']+1
+    elif str(message.author) != callAt:
+        cID = str(message.channel.id) ##message channel id
+        guildID = str(message.channel.guild.id) # what guild are we in?
+        with shelve.open(talkingChannelsPath, writeback=True) as s: #open talkingChannels shelf
+            if (guildID in s):
+                if (cID in s[guildID]):
+                    if(s[guildID][cID]['talks'] == True): 
+                        current = s[guildID][cID]
+                        chance = random.randint(0,current['chance']) #random chance
+                        print(f"count: {str(current['count'])} Chance: {str(chance)}")
+                        if(chance > current['count']):
+                            current['count'] += 1
+                        else:
+                            print("talking!")
+                            current['count'] = 0
+                            prefArt = random.choice(artChoices)
+                            prefDeck = decks['Biddy']
+                            s.close()
+                            await drawCard(message, prefDeck, prefArt, message.content, ctx)
 
 # # Drawing cards
 # @bot.command()
