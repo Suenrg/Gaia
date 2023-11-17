@@ -1,24 +1,14 @@
 import os
-
-class Card: #create the card class, for storing tarot card objects
-    def __init__(self, name, icon, upright, reverse, upLong, revLong):
-        self.name = name
-        self.icon = icon
-        self.upright = upright
-        self.reverse = reverse
-        self.upLong = upLong
-        self.revLong = revLong
-    def prints(self):
-        print(f"Name: {self.name}, Up: {self.up}, Rev: {self.rev}, upLong: {self.upLong}, revLong: {self.revLong}")
+from tarotFuncs import *
 
 
 class Deck:
     def __init__(self, name):
-        self.name = Name
+        self.name = name
         self.cards = {}
 
-    def addCard(card):
-        cards.append(card)
+    def addCard(self, card):
+        self.cards.append(card)
 
 
 
@@ -43,6 +33,6 @@ def loadDecks(paths):
 # ##main
 # meaningsPath = [os.path.dirname(__file__)+"\\meanings\\tarotMeanings.tsv"]
 # imgPath = os.path.dirname(__file__)+"\\images\\tarot\\"
-#
+
 # decks = loadDecks(meaningsPath)
 # print(decks)
