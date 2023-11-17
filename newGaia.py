@@ -21,20 +21,21 @@ GUILD = os.getenv('DISCORD_GUILD')
 
 #### variables
 test_guild_id = 775449492232208404
-guilds=[727652231419002880, 775449492232208404, 572854786513174529, 923448242107207720]
+guilds=[]#727652231419002880, 775449492232208404, 572854786513174529, 923448242107207720, 1149038131673309324]
 prefix="!t"
 intents = nextcord.Intents.default()
 intents.messages = True
 intents.reactions = True
 intents.message_content = True
 callAt = "<@1024094680968855663>"
-talkChance = 10 ##higher is less probable
+talkChance = 100 ##higher is less probable
 ##### filepaths
 
 
 ####
 
 bot = commands.Bot(command_prefix=prefix, intents=intents)
+
 
 #### Load decks and deckPrefs
 decks = loadDecks(meaningsPath)
@@ -43,9 +44,10 @@ decks = loadDecks(meaningsPath)
 
 @bot.event #start gaia up, show what guilds we're connected to 
 async def on_ready():
+    guilds=bot.guilds
     print(f'{bot.user} is connected to the following guilds:\n')
-    for guild in bot.guilds:
-        await bot.change_presence(status=nextcord.Status.online, activity=nextcord.Game("!t help"))
+    for guild in guilds:
+        await bot.change_presence(status=nextcord.Status.online, activity=nextcord.Game("! try /gaiatalking also !t help"))
         print(f'{guild.name}(id: {guild.id})') #test guild ID: 775449492232208404
        
 
@@ -87,21 +89,22 @@ async def on_message(message):
         cID = str(message.channel.id) ##message channel id
         guildID = str(message.channel.guild.id) # what guild are we in?
         with shelve.open(talkingChannelsPath, writeback=True) as s: #open talkingChannels shelf
-            if (guildID in s):
-                if (cID in s[guildID]):
-                    if(s[guildID][cID]['talks'] == True): 
+            if (guildID in s): #if this guild is in ther
+                if (cID in s[guildID]): #if this channel is in there
+                    if(s[guildID][cID]['talks'] == True):  #if talking is allowed
                         current = s[guildID][cID]
                         chance = random.randint(0,current['chance']) #random chance
-                        print(f"count: {str(current['count'])} Chance: {str(chance)}")
                         if(chance > current['count']):
                             current['count'] += 1
-                        else:
+                            print(f"not talking, count is {current['count']}")
+                        elif(chance <= current['count']):
                             print("talking!")
                             current['count'] = 0
                             prefArt = random.choice(artChoices)
                             prefDeck = decks['Biddy']
                             s.close()
                             await drawCard(message, prefDeck, prefArt, message.content, ctx)
+                        print(f"count: {str(current['count'])} Chance: {str(chance)}")
 
 # # Drawing cards
 # @bot.command()
