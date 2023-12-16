@@ -99,6 +99,8 @@ async def on_message(message):
                             print(f"not talking, count is {current['count']}")
                         elif(chance <= current['count']):
                             print("talking!")
+                            with open("talkingChanceData.csv", "a") as myfile:
+                                myfile.write(f"{current['count']},")
                             current['count'] = 0
                             prefArt = random.choice(artChoices)
                             prefDeck = decks['Biddy']
