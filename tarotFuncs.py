@@ -46,7 +46,12 @@ async def dispCard(mess, card, art, ctx):
     msg.set_image(url=f"attachment://image.png")
     button = await fullButton(ctx,file,msg.copy(),card).go(ctx)
     
-    
+async def checkMessage(mess, deck):
+    for i in deck:
+        if (i.lower() in mess.content.lower()):
+            print(f"Check returning {deck[i]}")
+            return deck[i]
+    return None
 
 ### PREFERENCES
 
