@@ -17,12 +17,13 @@ from conf import *
 
 load_dotenv() #token stuff
 TOKEN = os.getenv('DISCORD_TOKEN')
+# print(TOKEN)
 GUILD = os.getenv('DISCORD_GUILD')
 
 #### variables
-test_guild_id = 775449492232208404
-guilds=[]#727652231419002880, 775449492232208404, 572854786513174529, 923448242107207720, 1149038131673309324]
-prefix="!t"
+test_guild_id = 572854786513174529
+guilds=[test_guild_id]#727652231419002880, 775449492232208404, 572854786513174529, 923448242107207720, 1149038131673309324]
+prefix="!g"
 intents = nextcord.Intents.default()
 intents.messages = True
 intents.reactions = True
@@ -73,6 +74,8 @@ async def on_ready():
 ## on_message controls
 @bot.event
 async def on_message(message):
+    if message.author == bot.user: #don't talk to urself
+        return
     ctx = await bot.get_context(message)
     if(message.content.startswith(prefix) or callAt in message.content): ##are we in a command? checking for prefix or callAt
         print(f"##################\nCommand Recieved:\n\"{message.content}\"\n{message} ")
@@ -81,30 +84,48 @@ async def on_message(message):
         sendDeck = decks[prefs[0]]
         sendArt = prefs[1]
 
-        await drawCard(message, sendDeck, sendArt, message.content, ctx)
+        check = await checkMessage(message, sendDeck)
+        
+        if (check == None):
+            await drawCard(message, sendDeck, sendArt, message.content, ctx)
+        else:
+            await dispCard(message, check, sendArt, ctx)
 
     
     ##### handle  talking chances
-    elif str(message.author) != callAt:
+    elif not(str(message.author.id) in callAt):
+        # print(f"{message.author.id}")
         cID = str(message.channel.id) ##message channel id
         guildID = str(message.channel.guild.id) # what guild are we in?
+        everywhere = False
         with shelve.open(talkingChannelsPath, writeback=True) as s: #open talkingChannels shelf
-            if (guildID in s): #if this guild is in ther
-                if (cID in s[guildID]): #if this channel is in there
-                    if(s[guildID][cID]['talks'] == True):  #if talking is allowed
+            if (guildID in s): #if this guild is in there
+                if('everywhere' in s[guildID]):
+                    everywhere = s[guildID]['everywhere']
+                if (cID in s[guildID]) or everywhere: #if this channel is in there or everywhere is on
+
+                    if(not cID in s[guildID]):
+                        s[guildID][cID] = {}
+                        s[guildID][cID]['talks'] = False
+                        s[guildID][cID]['chance'] = talkChance
+                        s[guildID][cID]['count'] = 0
+
+                    if(everywhere or s[guildID][cID]['talks'] == True):  #if talking is allowed
                         current = s[guildID][cID]
                         chance = random.randint(0,current['chance']) #random chance
                         if(chance > current['count']):
                             current['count'] += 1
-                            print(f"not talking, count is {current['count']}")
+                            print(f"not talking, count is {current['count']}, had to be bigger than {chance}")
                         elif(chance <= current['count']):
-                            print("talking!")
+                            print(f"talking! count is {current['count']}, was bigger than {chance}")
+                            with open("talkingChanceData.csv", "a") as myfile:
+                                myfile.write(f"{current['count']},")
                             current['count'] = 0
                             prefArt = random.choice(artChoices)
                             prefDeck = decks['Biddy']
                             s.close()
                             await drawCard(message, prefDeck, prefArt, message.content, ctx)
-                        print(f"count: {str(current['count'])} Chance: {str(chance)}")
+                        print(f"Chance: {str(chance)} Count: {str(current['count'])} \n")
 
 # # Drawing cards
 # @bot.command()
@@ -127,7 +148,8 @@ async def choosedeck(
 @bot.slash_command(description="Lets Gaia talk in this channel freely (has a small chance to respond to a message with a card)", guild_ids=guilds)
 async def gaiatalking(
     ctx,
-    talks: bool = SlashOption(name="talks", required=False, default=True)
+    talks: bool = SlashOption(name="talks", required=False, default=True),
+    everywhere: bool = SlashOption(name="everywhere", required=False, default=False)
     ):
     messageAuthor = str(ctx.user)
     cID = str(ctx.channel.id)
@@ -136,6 +158,8 @@ async def gaiatalking(
     with shelve.open(talkingChannelsPath, writeback=True) as s:
         if not(guildID in s):
             s[guildID] = {}
+            s[guildID]['everywhere'] = False
+        s[guildID]['everywhere'] = everywhere
         s[guildID][cID] = {}
         s[guildID][cID]['talks'] = talks
         s[guildID][cID]['chance'] = talkChance
