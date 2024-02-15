@@ -137,13 +137,15 @@ async def on_message(message):
 @bot.slash_command(description="Sets which deck you want Gaia to use for you!", guild_ids=guilds)
 async def choosedeck(
     ctx,
-    deck: str = SlashOption(name="deck", choices=deckChoices, required=True, default=defaultDeck),
-    art: str = SlashOption(name="deck", choices=artChoices, required=True, default=defaultDeck)
+    # deck: str = SlashOption(name="deck", choices=deckChoices, required=False, default=defaultDeck),
+    art: str = SlashOption(name="art", choices=artChoices, required=True, default=defaultArt)
     ):
-    messageAuthor = str(ctx.user)
+    deck="Biddy"
+    messageAuthor = str(ctx.user.name)
     print(f"##################\nSaving prefs for {messageAuthor} with deck {deck}")
     await savePrefs(deckPrefsPath, messageAuthor, deck, art)
-    await ctx.send(f'Saved your preferences with deck = {deck.name}')
+    await ctx.send(f'Saved your preferences with art: {art} and meanings: {deck}')
+
 
 @bot.slash_command(description="Lets Gaia talk in this channel freely (has a small chance to respond to a message with a card)", guild_ids=guilds)
 async def gaiatalking(
