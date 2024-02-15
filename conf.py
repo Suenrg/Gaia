@@ -13,5 +13,5 @@ sigilImagesPath = path + "\\images\\"
 defaultDeck = "Biddy"
 defaultArt = "Biddy"
 deckChoices = ["Biddy"]
-artChoices = ["Biddy"]
+artChoices = ["Biddy", "Rider Waite"]
 # layoutChoices = ["spiral", "rect", "geomabet", "querty"]
