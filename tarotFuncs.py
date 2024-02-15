@@ -39,8 +39,8 @@ async def drawCard(mess, deck, art, prompt, ctx):
 # {message, card, art, ctx} -> DISPLAY -> {msg{embed}} {fullButton} 
 
 async def dispCard(mess, card, art, ctx):
-    print(f'displaying card: {card.name}, with art {art}')
-    cardIcon = imgPath + art + "\\" + card.icon
+    print(f'displaying card: {card.name}, art: {art}')
+    cardIcon = imgPath + art.lower() + "/" + card.icon
     msg = nextcord.Embed(title=card.name, description=(card.upright), color=mess.author.color)
     file = nextcord.File(cardIcon, filename="image.png")
     msg.set_image(url=f"attachment://image.png")

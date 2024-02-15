@@ -23,7 +23,7 @@ GUILD = os.getenv('DISCORD_GUILD')
 #### variables
 test_guild_id = 572854786513174529
 guilds=[]#727652231419002880, 775449492232208404, 572854786513174529, 923448242107207720, 1149038131673309324]
-prefix="!g"
+prefix="!t"
 intents = nextcord.Intents.default()
 intents.messages = True
 intents.reactions = True
@@ -79,7 +79,7 @@ async def on_message(message):
     ctx = await bot.get_context(message)
     if(message.content.startswith(prefix) or callAt in message.content): ##are we in a command? checking for prefix or callAt
         print(f"##################\nCommand Recieved:\n\"{message.content}\"\n{message} ")
-        messageAuthor = str(message.author.name) #message author
+        messageAuthor = str(message.author) #message author
         prefs = await getPrefs(deckPrefsPath, messageAuthor)
         sendDeck = decks[prefs[0]]
         sendArt = prefs[1]
@@ -137,14 +137,13 @@ async def on_message(message):
 @bot.slash_command(description="Sets which deck you want Gaia to use for you!", guild_ids=guilds)
 async def choosedeck(
     ctx,
-    # deck: str = SlashOption(name="deck", choices=deckChoices, required=False, default=defaultDeck),
-    art: str = SlashOption(name="art", choices=artChoices, required=True, default=defaultArt)
+    deck: str = SlashOption(name="deck", choices=deckChoices, required=True, default=defaultDeck),
+    art: str = SlashOption(name="deck", choices=artChoices, required=True, default=defaultDeck)
     ):
-    deck="Biddy"
-    messageAuthor = str(ctx.user.name)
+    messageAuthor = str(ctx.user)
     print(f"##################\nSaving prefs for {messageAuthor} with deck {deck}")
     await savePrefs(deckPrefsPath, messageAuthor, deck, art)
-    await ctx.send(f'Saved your preferences with art: {art} and meanings: {deck}')
+    await ctx.send(f'Saved your preferences with deck = {deck.name}')
 
 @bot.slash_command(description="Lets Gaia talk in this channel freely (has a small chance to respond to a message with a card)", guild_ids=guilds)
 async def gaiatalking(
@@ -152,7 +151,7 @@ async def gaiatalking(
     talks: bool = SlashOption(name="talks", required=False, default=True),
     everywhere: bool = SlashOption(name="everywhere", required=False, default=False)
     ):
-    messageAuthor = str(ctx.user.name)
+    messageAuthor = str(ctx.user)
     cID = str(ctx.channel.id)
     guildID = str(ctx.channel.guild.id)
     print(f"##################\nLetting Gaia talk in channel:{cID} in guild:{guildID} for {messageAuthor} ")
