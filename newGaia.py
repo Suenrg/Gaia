@@ -134,8 +134,8 @@ async def on_message(message):
 #     await drawCard(mess, deck, art, prompt, ctx)
 
 ## deck prefences
-@bot.slash_command(description="Sets which deck you want Gaia to use for you!", guild_ids=guilds)
-async def choosedeck(
+@bot.slash_command(description="Sets which art you want Gaia to use for you!", guild_ids=guilds)
+async def chooseart(
     ctx,
     # deck: str = SlashOption(name="deck", choices=deckChoices, required=False, default=defaultDeck),
     art: str = SlashOption(name="art", choices=artChoices, required=True, default=defaultArt)
