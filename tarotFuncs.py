@@ -39,7 +39,7 @@ async def drawCard(mess, deck, art, prompt, ctx):
 # {message, card, art, ctx} -> DISPLAY -> {msg{embed}} {fullButton} 
 
 async def dispCard(mess, card, art, ctx):
-    print(f'displaying card: {card.name}')
+    print(f'displaying card: {card.name}, art: {art}')
     cardIcon = imgPath + art.lower() + "/" + card.icon
     msg = nextcord.Embed(title=card.name, description=(card.upright), color=mess.author.color)
     file = nextcord.File(cardIcon, filename="image.png")
@@ -56,17 +56,19 @@ async def checkMessage(mess, deck):
 ### PREFERENCES
 
 async def savePrefs(deckPrefsPath, name, deck, art):
-    with shelve.open(deckPrefsPath) as shelf:
+    with shelve.open(deckPrefsPath, writeback=True) as shelf:
         if not name in shelf:
             shelf[name] = {}
         shelf[name]['deck'] = deck
         shelf[name]['art'] = art
+    print(f'Saved prefs for {name}, Deck: {deck}, art: {art}')
 
 async def getPrefs(deckPrefsPath, name):
     deck = ""
     art = ""
     with shelve.open(deckPrefsPath) as s: ##open deckprefs
         if (name in s): ##if they are in the doc and have deck
+            print(f'getting prefs for {name}')
             if ('deck' in s[name]): ## if they have a deck
                 deck = s[name]['deck'] #choose it
             else:  #otherwise go default
@@ -78,6 +80,7 @@ async def getPrefs(deckPrefsPath, name):
         else:
             deck = defaultDeck
             art = defaultArt
+    print(f'{name} is using prefs {deck}, {art} ')
     return [deck, art]
 
 
