@@ -22,8 +22,8 @@ GUILD = os.getenv('DISCORD_GUILD')
 
 #### variables
 test_guild_id = 572854786513174529
-guilds=[test_guild_id]#727652231419002880, 775449492232208404, 572854786513174529, 923448242107207720, 1149038131673309324]
-prefix="!g"
+guilds=[]#727652231419002880, 775449492232208404, 572854786513174529, 923448242107207720, 1149038131673309324]
+prefix="!t"
 intents = nextcord.Intents.default()
 intents.messages = True
 intents.reactions = True
