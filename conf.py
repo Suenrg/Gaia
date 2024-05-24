@@ -1,5 +1,6 @@
 ##conf.py
 import os
+import sqlite3
 path = os.path.dirname(__file__)
 vaultPath = path + "\\vault\\"
 meaningsPath = [path + "\\meanings\\tarotMeanings.tsv"]
@@ -9,7 +10,7 @@ talkingChannelsPath = path + "\\settings\\talkingChannels"
 layoutsPath = path + "\\meanings\\layouts"
 sigilImagesPath = path + "\\images\\"
 
-
+database = "GaiaDatabase"
 defaultDeck = "Biddy"
 defaultArt = "Biddy"
 deckChoices = ["Biddy"]

@@ -19,7 +19,7 @@ load_dotenv() #token stuff
 TOKEN = os.getenv('DISCORD_TOKEN')
 # print(TOKEN)
 GUILD = os.getenv('DISCORD_GUILD')
-
+setupDatabase()
 #### variables
 test_guild_id = 572854786513174529
 guilds=[]#727652231419002880, 775449492232208404, 572854786513174529, 923448242107207720, 1149038131673309324]
@@ -84,13 +84,20 @@ async def on_message(message):
         sendDeck = decks[prefs[0]]
         sendArt = prefs[1]
 
-        check = await checkMessage(message, sendDeck)
+        checkedCardAsk = await checkCardAsk(message, sendDeck) #checks to see if we're asking a bout a specific card
+        checkedCommandAsk = await checkCommandAsk(message)
         
-        if (check == None):
-            await drawCard(message, sendDeck, sendArt, message.content, ctx)
+        if (checkedCardAsk != None): #if they did ask about a specific card:
+            await dispCard(message, checkedCardAsk, sendArt, ctx)
         else:
-            await dispCard(message, check, sendArt, ctx)
+            if checkedCommandAsk == "daily":## if we see a daily command
+                await dailyPull(message, sendDeck, sendArt, ctx)
+            # elif checkCommandAsk == "":
+            #     await
+            else: # if there's no command or card ask
+                await drawCard(message, sendDeck, sendArt, message.content, ctx, True)
 
+            
     
     ##### handle  talking chances
     elif not(str(message.author.id) in callAt):
@@ -124,7 +131,7 @@ async def on_message(message):
                             prefArt = random.choice(artChoices)
                             prefDeck = decks['Biddy']
                             s.close()
-                            await drawCard(message, prefDeck, prefArt, message.content, ctx)
+                            await drawCard(message, prefDeck, prefArt, message.content, ctx, True)
                         print(f"Chance: {str(chance)} Count: {str(current['count'])} \n")
 
 # # Drawing cards
