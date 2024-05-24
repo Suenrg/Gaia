@@ -25,6 +25,9 @@ def setupDatabase():
         meanings  TEXT
         );"""
         print(cur.execute(setupTable)) #name, userID, daily, dailyDate, art, meanings
+        conn.commit()
+        conn.close()
+
 #CARD CLASS
 
 class Card (menus.Menu): #create the card class, for storing tarot card objects
@@ -83,6 +86,7 @@ async def dailyPull(mess, deck, art, ctx):
     user = str(mess.author)
     id = str(mess.author.id)
     dailyDate = datetime.now().day
+    print("entering daily try catch")
    # print(f"user = {user}, id = {id}, date = {dailyDate}")
     try:
         with sqlite3.connect(database) as conn: # connect to the database
