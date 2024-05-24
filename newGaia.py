@@ -29,7 +29,7 @@ intents.messages = True
 intents.reactions = True
 intents.message_content = True
 callAt = "<@1024094680968855663>"
-talkChance = 100 ##higher is less probable
+talkChance = 120#100 ##higher is less probable
 ##### filepaths
 
 
@@ -120,12 +120,12 @@ async def on_message(message):
                             print(f"talking! count is {current['count']}, was bigger than {chance}")
                             with open("talkingChanceData.csv", "a") as myfile:
                                 myfile.write(f"{current['count']},")
-                            current['count'] = 0
+                            current['count'] = -5
                             prefArt = random.choice(artChoices)
                             prefDeck = decks['Biddy']
                             s.close()
                             await drawCard(message, prefDeck, prefArt, message.content, ctx)
-                        print(f"Chance: {str(chance)} Count: {str(current['count'])} \n")
+                       # print(f"Chance: {str(chance)} Count: {str(current['count'])} \n")
 
 # # Drawing cards
 # @bot.command()
@@ -167,7 +167,7 @@ async def gaiatalking(
         s[guildID][cID]['chance'] = talkChance
         s[guildID][cID]['count'] = 0
         print(f"s[guildID][cID] = {s[guildID][cID]}")
-    await ctx.send(f"Gaia can talk in this channel: {talks}")
+    await ctx.send(f"Gaia can talk in this channel: {talks}\nGaia can talk everywhere: {everywhere}")
 
 
 
